@@ -1,0 +1,3 @@
+# The URL of your n8n Webhook node
+# Ensure the method is POST and it's active
+N8N_WEBHOOK_URL=http://localhost:5678/webhook-test/process-document
