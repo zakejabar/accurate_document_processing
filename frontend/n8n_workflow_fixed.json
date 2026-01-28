@@ -1,0 +1,202 @@
+{
+    "name": "AMI - Agentic Market Intelligence (Fixed)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "upload",
+                "responseMode": "responseNode",
+                "options": {
+                    "binaryData": true
+                }
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "webhook-node",
+            "name": "Webhook (Upload)",
+            "webhookId": "d06bd5f9-d4a1-4ad7-a86f-b4e232a4272a"
+        },
+        {
+            "parameters": {
+                "fileFormat": "csv",
+                "options": {}
+            },
+            "id": "ead4567-fix-parse",
+            "name": "Parse CSV File",
+            "type": "n8n-nodes-base.spreadsheetFile",
+            "typeVersion": 2,
+            "position": [
+                220,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.tavily.com/search",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer {{ $env.TAVILY_API_KEY }}"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "query",
+                            "value": "={{ $json.item_name || $json['Item Name'] || 'unknown item' }} harga site:tokopedia.com OR site:shopee.co.id"
+                        },
+                        {
+                            "name": "include_answer",
+                            "value": true
+                        },
+                        {}
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 3,
+            "position": [
+                608,
+                0
+            ],
+            "id": "tavily-search",
+            "name": "Tavily Search"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.groq.com/openai/v1/chat/completions",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer {{ $env.GROQ_API_KEY }}"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "model",
+                            "value": "llama-3.3-70b-versatile"
+                        },
+                        {
+                            "name": "messages",
+                            "value": "=[{\"role\": \"user\", \"content\": \"Analyze this price data...\"}]"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 3,
+            "position": [
+                816,
+                0
+            ],
+            "id": "groq-ai",
+            "name": "Groq AI Agent"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.4,
+            "position": [
+                1024,
+                0
+            ],
+            "id": "respond-node",
+            "name": "Respond to Webhook"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "{\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"Who won the euro 2024?\"\n        }\n      ]\n    }\n  ],\n  \"tools\": [\n    {\n      \"google_search\": {}\n    }\n  ]\n}",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                416,
+                0
+            ],
+            "id": "gemini-request",
+            "name": "HTTP Request (Gemini)"
+        }
+    ],
+    "pinData": {},
+    "connections": {
+        "Webhook (Upload)": {
+            "main": [
+                [
+                    {
+                        "node": "Parse CSV File",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse CSV File": {
+            "main": [
+                [
+                    {
+                        "node": "HTTP Request (Gemini)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Tavily Search": {
+            "main": [
+                [
+                    {
+                        "node": "Groq AI Agent",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq AI Agent": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "HTTP Request (Gemini)": {
+            "main": [
+                [
+                    {
+                        "node": "Tavily Search",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

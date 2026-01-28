@@ -32,7 +32,8 @@ export default function FileUpload() {
             });
 
             if (!res.ok) {
-                throw new Error(`Error: ${res.statusText}`);
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.details || errorData.error || `Error: ${res.statusText}`);
             }
 
             const data = await res.json();
@@ -75,8 +76,8 @@ export default function FileUpload() {
                     onClick={handleUpload}
                     disabled={!file || status === 'uploading'}
                     className={`w-full py-2 px-4 rounded-lg font-medium text-white transition-colors ${!file || status === 'uploading'
-                            ? 'bg-zinc-400 cursor-not-allowed'
-                            : 'bg-blue-600 hover:bg-blue-700'
+                        ? 'bg-zinc-400 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-700'
                         }`}
                 >
                     {status === 'uploading' ? 'Processing...' : 'Process Document'}
