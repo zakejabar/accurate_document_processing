@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import MarkdownRenderer from './MarkdownRenderer';
 
 export default function FileUpload() {
     const [file, setFile] = useState<File | null>(null);
@@ -47,7 +48,7 @@ export default function FileUpload() {
     };
 
     return (
-        <div className="w-full max-w-md mx-auto p-6 bg-white dark:bg-zinc-900 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800">
+        <div className={`w-full mx-auto p-6 bg-white dark:bg-zinc-900 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800 transition-all duration-700 ease-in-out ${status === 'success' && response ? 'max-w-4xl' : 'max-w-md'}`}>
             <h2 className="text-2xl font-bold mb-4 text-zinc-900 dark:text-zinc-100">Upload Document</h2>
 
             <div className="flex flex-col gap-4">
@@ -83,12 +84,38 @@ export default function FileUpload() {
                     {status === 'uploading' ? 'Processing...' : 'Process Document'}
                 </button>
 
-                {status === 'success' && (
-                    <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-300">
-                        <h3 className="font-semibold mb-2">Result:</h3>
-                        <pre className="text-xs overflow-auto whitespace-pre-wrap max-h-40">
-                            {JSON.stringify(response, null, 2)}
-                        </pre>
+                {status === 'success' && response && (
+                    <div className="mt-8 animate-slide-up">
+                        <div className="relative p-1 rounded-2xl bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/20">
+                            <div className="relative bg-white/80 dark:bg-zinc-900/90 backdrop-blur-xl rounded-xl p-6 shadow-2xl border border-white/20 overflow-hidden">
+                                {/* Decorative background blobs */}
+                                <div className="absolute -top-24 -right-24 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                                <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+                                <div className="relative z-10">
+                                    <div className="flex items-center gap-3 mb-6 border-b border-zinc-200/50 dark:border-zinc-700/50 pb-4">
+                                        <div className="p-2.5 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl shadow-lg shadow-indigo-500/20">
+                                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                        </div>
+                                        <h3 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-400">
+                                            Analysis Result
+                                        </h3>
+                                    </div>
+
+                                    {response?.candidates?.[0]?.content?.parts?.[0]?.text ? (
+                                        <MarkdownRenderer
+                                            content={response.candidates[0].content.parts[0].text}
+                                        />
+                                    ) : (
+                                        <pre className="text-xs overflow-auto whitespace-pre-wrap max-h-60 p-4 bg-zinc-50 dark:bg-zinc-950 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 font-mono shadow-inner">
+                                            {JSON.stringify(response, null, 2)}
+                                        </pre>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
 
