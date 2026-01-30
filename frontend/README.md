@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# n8n Document Processor
+
+This project is a Next.js application that allows you to upload documents and process them using n8n workflows.
+
+## Features
+
+-   **File Upload:** Upload PDF, DOCX, TXT, or CSV files.
+-   **n8n Integration:** The uploaded files are sent to an n8n workflow for processing.
+-   **Market Intelligence Pipeline:** The n8n workflow processes the document (extracting text or parsing CSV) and uses Google Gemini to analyze market prices in Indonesia.
+-   **Mock API:** The application includes a mock API that allows you to test the frontend without a live n8n instance.
 
 ## Getting Started
 
-First, run the development server:
+1.  **Clone the repository:**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+    ```bash
+    git clone https://github.com/your-username/your-repository.git
+    ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2.  **Install the dependencies:**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+    ```bash
+    cd frontend
+    npm install
+    ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3.  **Set up the environment variables:**
 
-## Learn More
+    Create a `.env.local` file in the `frontend` directory and add the following environment variables:
 
-To learn more about Next.js, take a look at the following resources:
+    ```bash
+    N8N_WEBHOOK_URL=
+    ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+    You can find the webhook URL in your n8n workflow editor.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4.  **Run the development server:**
 
-## Deploy on Vercel
+    ```bash
+    npm run dev
+    ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+    The application will be available at `http://localhost:3000`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## n8n Workflow
+
+The n8n workflow is defined in the `n8n_workflow_fixed.json` file. You can import this file into your n8n instance to set up the workflow.
+
+The workflow has the following nodes:
+
+-   **Webhook (Upload)1:** Receives the uploaded file binary data.
+-   **Extract from File:** Extracts text content from uploaded documents.
+-   **Parse CSV File:** Parses uploaded CSV files (alternative path).
+-   **HTTP Request (Gemini):** Sends a prompt to Google Gemini to ask about market prices in Indonesia for the extracted item.
+-   **Respond to Webhook1:** Returns the AI analysis to the frontend.

@@ -3,6 +3,46 @@
     "nodes": [
         {
             "parameters": {
+                "fileFormat": "csv",
+                "options": {}
+            },
+            "id": "695f78e5-345b-45b5-ad24-bf4d111f37e1",
+            "name": "Parse CSV File",
+            "type": "n8n-nodes-base.spreadsheetFile",
+            "typeVersion": 2,
+            "position": [
+                512,
+                -48
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent",
+                "authentication": "predefinedCredentialType",
+                "nodeCredentialType": "googlePalmApi",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"Berapa harga pasaran {{ $json.item_name }} di indonesia \"\n        }\n      ]\n    }\n  ],\n  \"tools\": [\n    {\n      \"google_search\": {}\n    }\n  ]\n} ",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.3,
+            "position": [
+                944,
+                128
+            ],
+            "id": "b61a8589-ad85-46b6-a035-3b7340ec917b",
+            "name": "HTTP Request (Gemini)",
+            "credentials": {
+                "googlePalmApi": {
+                    "id": "52TQEbFxkrMJSc8r",
+                    "name": "Google Gemini(PaLM) Api account 3"
+                }
+            }
+        },
+        {
+            "parameters": {
                 "httpMethod": "POST",
                 "path": "upload",
                 "responseMode": "responseNode",
@@ -13,101 +53,12 @@
             "type": "n8n-nodes-base.webhook",
             "typeVersion": 1,
             "position": [
-                0,
-                0
+                288,
+                128
             ],
-            "id": "webhook-node",
-            "name": "Webhook (Upload)",
+            "id": "a3de3419-2726-4305-87e8-210c7e2e5f52",
+            "name": "Webhook (Upload)1",
             "webhookId": "d06bd5f9-d4a1-4ad7-a86f-b4e232a4272a"
-        },
-        {
-            "parameters": {
-                "fileFormat": "csv",
-                "options": {}
-            },
-            "id": "ead4567-fix-parse",
-            "name": "Parse CSV File",
-            "type": "n8n-nodes-base.spreadsheetFile",
-            "typeVersion": 2,
-            "position": [
-                220,
-                0
-            ]
-        },
-        {
-            "parameters": {
-                "method": "POST",
-                "url": "https://api.tavily.com/search",
-                "sendHeaders": true,
-                "headerParameters": {
-                    "parameters": [
-                        {
-                            "name": "Authorization",
-                            "value": "Bearer {{ $env.TAVILY_API_KEY }}"
-                        }
-                    ]
-                },
-                "sendBody": true,
-                "bodyParameters": {
-                    "parameters": [
-                        {
-                            "name": "query",
-                            "value": "={{ $json.item_name || $json['Item Name'] || 'unknown item' }} harga site:tokopedia.com OR site:shopee.co.id"
-                        },
-                        {
-                            "name": "include_answer",
-                            "value": true
-                        },
-                        {}
-                    ]
-                },
-                "options": {}
-            },
-            "type": "n8n-nodes-base.httpRequest",
-            "typeVersion": 3,
-            "position": [
-                608,
-                0
-            ],
-            "id": "tavily-search",
-            "name": "Tavily Search"
-        },
-        {
-            "parameters": {
-                "method": "POST",
-                "url": "https://api.groq.com/openai/v1/chat/completions",
-                "sendHeaders": true,
-                "headerParameters": {
-                    "parameters": [
-                        {
-                            "name": "Authorization",
-                            "value": "Bearer {{ $env.GROQ_API_KEY }}"
-                        }
-                    ]
-                },
-                "sendBody": true,
-                "bodyParameters": {
-                    "parameters": [
-                        {
-                            "name": "model",
-                            "value": "llama-3.3-70b-versatile"
-                        },
-                        {
-                            "name": "messages",
-                            "value": "=[{\"role\": \"user\", \"content\": \"Analyze this price data...\"}]"
-                        }
-                    ]
-                },
-                "options": {}
-            },
-            "type": "n8n-nodes-base.httpRequest",
-            "typeVersion": 3,
-            "position": [
-                816,
-                0
-            ],
-            "id": "groq-ai",
-            "name": "Groq AI Agent"
         },
         {
             "parameters": {
@@ -116,36 +67,52 @@
             "type": "n8n-nodes-base.respondToWebhook",
             "typeVersion": 1.4,
             "position": [
-                1024,
-                0
+                1232,
+                112
             ],
-            "id": "respond-node",
-            "name": "Respond to Webhook"
+            "id": "00542e59-8d8c-452f-8e96-0c6f27497389",
+            "name": "Respond to Webhook1"
         },
         {
             "parameters": {
-                "method": "POST",
-                "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent",
-                "sendBody": true,
-                "specifyBody": "json",
-                "jsonBody": "{\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"Who won the euro 2024?\"\n        }\n      ]\n    }\n  ],\n  \"tools\": [\n    {\n      \"google_search\": {}\n    }\n  ]\n}",
                 "options": {}
             },
-            "type": "n8n-nodes-base.httpRequest",
-            "typeVersion": 4.3,
+            "type": "n8n-nodes-base.extractFromFile",
+            "typeVersion": 1.1,
             "position": [
-                416,
-                0
+                496,
+                128
             ],
-            "id": "gemini-request",
-            "name": "HTTP Request (Gemini)"
+            "id": "f49cc941-7214-49fb-9252-95ad780f0d70",
+            "name": "Extract from File"
         }
     ],
     "pinData": {},
     "connections": {
-        "Webhook (Upload)": {
+        "Parse CSV File": {
+            "main": [
+                []
+            ]
+        },
+        "HTTP Request (Gemini)": {
             "main": [
                 [
+                    {
+                        "node": "Respond to Webhook1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook (Upload)1": {
+            "main": [
+                [
+                    {
+                        "node": "Extract from File",
+                        "type": "main",
+                        "index": 0
+                    },
                     {
                         "node": "Parse CSV File",
                         "type": "main",
@@ -154,7 +121,7 @@
                 ]
             ]
         },
-        "Parse CSV File": {
+        "Extract from File": {
             "main": [
                 [
                     {
@@ -164,39 +131,17 @@
                     }
                 ]
             ]
-        },
-        "Tavily Search": {
-            "main": [
-                [
-                    {
-                        "node": "Groq AI Agent",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Groq AI Agent": {
-            "main": [
-                [
-                    {
-                        "node": "Respond to Webhook",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "HTTP Request (Gemini)": {
-            "main": [
-                [
-                    {
-                        "node": "Tavily Search",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
         }
-    }
+    },
+    "active": true,
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "versionId": "b91dee0b-0c9b-4cf1-8890-d6b48f1974a4",
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "962b0677a91f6fb52d13c5495cea8f5f5c18c3ff1a865a73e9a9037ac9ef8093"
+    },
+    "id": "kPN906JgyvlEUR5R",
+    "tags": []
 }
